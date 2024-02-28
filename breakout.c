@@ -1,3 +1,4 @@
+#include <string.h>
 #include "raylib.h"
 
 typedef struct Player {
@@ -9,6 +10,15 @@ typedef struct Player {
 	Color color;
 } Player;
 
+typedef struct Ball {
+	int x;
+	int y;
+	float radius;
+	int speedX;
+	int speedY;
+	Color color;
+} Ball;
+
 int main(void)
 {
 	int screenWidth = 800;
@@ -19,6 +29,10 @@ int main(void)
 
 	Player player = {((screenWidth / 2) - ( 150 / 2)), (screenHeight - (14 + 10)), 6, 150, 14, RAYWHITE};
 	Rectangle playerRec = {player.x, player.y, player.width, player.height};
+
+	Ball ball = {screenWidth / 2, screenHeight / 2, 10, 5, 5, WHITE};
+
+	char winnerText[30] = { 0 };
 
 	while (!WindowShouldClose()) {
 
@@ -35,12 +49,34 @@ int main(void)
 			playerRec.x = (screenWidth - playerRec.width);
 		}
 
+		ball.x += ball.speedX;
+		ball.y += ball.speedY;
+		if (ball.x < 0) {
+			ball.x = 0;
+			ball.speedX *= -1;
+		}
+		if (ball.x > (screenWidth - ball.radius)) {
+			ball.x = (screenWidth - ball.radius);
+			ball.speedX *= 1;
+		}
+		if (ball.y < 0) {
+			ball.y = 0;
+			ball.speedY *= -1;
+		}
+		if (ball.y > (screenHeight - ball.radius)) {
+			memcpy(winnerText, "You lose", 9);
+		}
+		if (CheckCollisionCircleRec((Vector2){ball.x, ball.y}, ball.radius, playerRec)) {
+			if (ball.speedY > 0) {
+				ball.speedY *= -1;
+				ball.speedX *= -1;
+			}
+		}
+
 		BeginDrawing();
-
-			ClearBackground(BLACK);
-
-			DrawRectangleRec(playerRec, player.color);
-
+		ClearBackground(BLACK);
+		DrawRectangleRec(playerRec, player.color);
+		DrawCircle(ball.x, ball.y, ball.radius, ball.color);
 		EndDrawing();
 
 	}
